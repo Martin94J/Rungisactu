@@ -1,0 +1,95 @@
+settings:
+  max_age_days: 7          # ignore les articles plus vieux
+  retention_days: 90       # durée de conservation sur la page
+  min_score: 6             # note de pertinence minimale (0-10) donnée par Claude
+  model_search: claude-sonnet-5-5
+  model_filter: claude-haiku-5-5
+  discovery_max_searches: 4  # recherches web Claude par sujet (mettre 0 pour couper et réduire le coût)
+
+# priority 1 = veille complète, 2 = veille légère. Un sujet = un périmètre précis.
+# "brief" dit à Claude ce qui est pertinent ET ce qu'il faut rejeter.
+topics:
+  - id: mairie-rungis
+    group: Commune de Rungis
+    label: Mairie et élus
+    priority: 1
+    queries: ['"Mairie de Rungis"', '"ville de Rungis"', '"Bruno Marcillaud"', '"maire de Rungis"', 'conseil municipal Rungis']
+    brief: "Vie municipale de Rungis (94) : élus, conseil municipal, budget, travaux, urbanisme, sécurité, équipements. Rejeter les articles sur le Marché de gros sauf implication de la mairie."
+  - id: parkings
+    group: Commune de Rungis
+    label: Parkings Orly-Rungis-Wissous
+    priority: 1
+    queries: ['parking sauvage Orly Rungis Wissous', 'parkings illégaux Orly', '"Parking Rungis Wissous"', 'navettes parking Orly Rungis']
+    brief: "Parkings (sauvages, navettes, arrêtés, jugements, contrôles) autour d'Orly, à Rungis, Wissous, Chevilly-Larue, Paray-Vieille-Poste. Rejeter les offres commerciales de parking."
+  - id: rungis-wissous
+    group: Commune de Rungis
+    label: Rungis-Wissous (voirie, projets communs)
+    priority: 1
+    queries: ['"Rungis Wissous"', 'déviation Rungis Wissous', 'Montjean Rungis']
+    brief: "Projets, voirie, aménagements ou différends concernant à la fois Rungis et Wissous."
+  - id: marche-semmaris
+    group: Acteurs économiques
+    label: Marché de Rungis et Semmaris
+    priority: 1
+    queries: ['Semmaris', '"Marché international de Rungis"', '"MIN de Rungis"', '"marché de Rungis"']
+    brief: "Gouvernance, investissements, projets, grèves, sécurité, appels d'offres du Marché international de Rungis et de la Semmaris. Rejeter recettes, cours des produits et tourisme gastronomique sans enjeu pour le site."
+  - id: icade
+    group: Acteurs économiques
+    label: Icade à Rungis
+    priority: 1
+    queries: ['Icade Rungis', '"Paris Orly-Rungis" parc', 'Icade parc d’affaires Orly Rungis']
+    brief: "Uniquement Icade en lien avec Rungis ou le parc Paris Orly-Rungis (baux, locataires, projets, cessions). Rejeter les résultats financiers ou projets Icade sans lien avec Rungis."
+  - id: sogaris
+    group: Acteurs économiques
+    label: Sogaris à Rungis
+    priority: 1
+    queries: ['Sogaris Rungis', 'Sogaris plateforme logistique Rungis', 'Sogaris logistique urbaine Île-de-France']
+    brief: "Sogaris (logistique urbaine) : site de Rungis en priorité, grands projets Île-de-France ensuite. Aucun lien avec Icade sauf mention explicite."
+  - id: entreprises
+    group: Acteurs économiques
+    label: Entreprises à Rungis
+    priority: 1
+    queries: ['entreprise Rungis implantation', 'siège social Rungis', 'Rungis licenciements OR recrutements', 'Rungis rachat entreprise']
+    brief: "Entreprises basées ou s'installant à Rungis (implantations, fermetures, emplois, rachats). Rejeter Semmaris, Icade, Sogaris (suivis à part) et les annonces d'emploi."
+  - id: adp-orly
+    group: Aéroport et mobilité
+    label: ADP et Orly
+    priority: 1
+    queries: ['Aéroport d’Orly', '"Groupe ADP" Orly', 'Orly riverains bruit', 'Orly travaux piste', 'Orly trafic passagers']
+    brief: "Aéroport d'Orly et ADP côté Orly : trafic, travaux, bruit, accès, stratégie. Rejeter Roissy-CDG seul et les offres de vols."
+  - id: pole-orly-rungis
+    group: Aéroport et mobilité
+    label: Pôle Orly-Rungis
+    priority: 1
+    queries: ['"Orly Rungis"', 'pôle Orly-Rungis aménagement', 'ligne 14 Orly Rungis', 'tram T7 OR T9 Rungis']
+    brief: "Aménagement, économie et transports du secteur Orly-Rungis (métro 14 et 18, tram, Grand Paris Express, zones d'activités)."
+  - id: wissous
+    group: Communes voisines
+    label: Wissous
+    priority: 2
+    queries: ['"mairie de Wissous"', '"maire de Wissous"']
+    brief: "Actualité municipale de Wissous (91) : décisions, projets, polémiques."
+  - id: fresnes
+    group: Communes voisines
+    label: Fresnes
+    priority: 2
+    queries: ['"mairie de Fresnes" Val-de-Marne', '"maire de Fresnes" 94']
+    brief: "Actualité municipale de Fresnes (94). Rejeter la prison de Fresnes sauf impact local majeur."
+  - id: chevilly-larue
+    group: Communes voisines
+    label: Chevilly-Larue
+    priority: 2
+    queries: ['"mairie de Chevilly-Larue"', '"maire de Chevilly-Larue"']
+    brief: "Actualité municipale de Chevilly-Larue (94). Rejeter Chevilly (Loiret)."
+  - id: paray
+    group: Communes voisines
+    label: Paray-Vieille-Poste
+    priority: 2
+    queries: ['"Paray-Vieille-Poste" mairie', '"maire de Paray-Vieille-Poste"']
+    brief: "Actualité municipale de Paray-Vieille-Poste (91)."
+  - id: thiais
+    group: Communes voisines
+    label: Thiais
+    priority: 2
+    queries: ['"mairie de Thiais"', '"maire de Thiais"']
+    brief: "Actualité municipale de Thiais (94)."

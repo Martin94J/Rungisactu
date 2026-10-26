@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veille Rungis</title>
+<style>
+:root{--bg:#eceff1;--card:#fff;--ink:#14212b;--mut:#5b6b77;--line:#d5dce1;--ac:#0b6e75;--new:#b45309;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#11181d;--card:#192229;--ink:#e6edf1;--mut:#93a4b0;--line:#2a3640;--ac:#52c1c9;--new:#f0a34a;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+header{padding:28px 20px 12px;max-width:1200px;margin:0 auto}
+h1{font:700 1.7rem/1.2 Georgia,"Times New Roman",serif;margin:0}
+.meta{color:var(--mut);font-size:.85rem;margin-top:4px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 20px}
+.bar>div{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button,input,select{font:inherit;color:var(--ink)}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:4px 12px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:#fff}
+input,select{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 10px}
+input{flex:1;min-width:160px}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+main{max-width:1200px;margin:0 auto;padding:18px 20px 60px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit}
+.card:hover{border-color:var(--ac)}
+.img{aspect-ratio:16/9;background:linear-gradient(135deg,var(--ac),#123);display:grid;place-items:center;color:#fff;font:700 2.4rem Georgia,serif;overflow:hidden}
+.img img{width:100%;height:100%;object-fit:cover;display:block}
+.body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tags{font-size:.78rem;color:var(--mut)}
+.tags b{color:var(--ac)}
+.new{color:var(--new);font-weight:700}
+h3{font-size:1rem;line-height:1.3;margin:0}
+.sum{font-size:.88rem;color:var(--mut);margin:0}
+.foot{margin-top:auto;font-size:.78rem;color:var(--mut)}
+.empty{padding:40px 0;color:var(--mut)}
+</style>
+</head>
+<body>
+<header><h1>Veille Rungis et alentours</h1><div class="meta" id="meta">Chargement…</div></header>
+<div class="bar"><div id="chips"></div><div style="display:flex;gap:8px;flex:1;min-width:260px">
+<input id="q" type="search" placeholder="Rechercher un mot, un sujet, une source" aria-label="Rechercher">
+<select id="topic" aria-label="Sujet"></select>
+<select id="period" aria-label="Période"><option value="1">24 h</option><option value="7" selected>7 jours</option><option value="30">30 jours</option><option value="999">Tout</option></select></div></div>
+<main><div class="grid" id="grid"></div><div class="empty" id="empty" hidden>Aucun article pour ces filtres. Élargissez la période ou changez de sujet.</div></main>
+<script>
+let all=[],group="";
+const $=id=>document.getElementById(id),fmt=d=>new Date(d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function card(a){
+  const c=el("a","card");c.href=a.url;c.target="_blank";c.rel="noopener noreferrer";
+  const im=el("div","img");
+  if(a.image){const i=new Image();i.loading="lazy";i.alt="";i.referrerPolicy="no-referrer";i.src=a.image;i.onerror=()=>{im.textContent=a.label[0]};im.append(i)}else im.textContent=a.label[0];
+  const b=el("div","body"),t=el("div","tags");
+  if(Date.now()-new Date(a.first_seen)<864e5){t.append(el("span","new","Nouveau "))}
+  t.append(el("b",null,a.label),document.createTextNode(" · "+a.category));
+  b.append(t,el("h3",null,a.title),el("p","sum",a.summary),el("div","foot",a.source+" · "+fmt(a.published)));
+  c.append(im,b);return c}
+function draw(){
+  const q=$("q").value.toLowerCase(),tp=$("topic").value,days=+$("period").value,lim=Date.now()-days*864e5;
+  const L=all.filter(a=>(!group||a.group===group)&&(!tp||a.topic===tp)&&new Date(a.published)>=lim&&(!q||(a.title+a.summary+a.source+a.label).toLowerCase().includes(q)))
+   .sort((x,y)=>x.priority-y.priority||new Date(y.published)-new Date(x.published));
+  $("grid").replaceChildren(...L.map(card));$("empty").hidden=L.length>0}
+fetch("data/articles.json",{cache:"no-store"}).then(r=>r.json()).then(d=>{
+  all=d.articles;
+  $("meta").textContent=d.generated_at?`Mise à jour le ${new Date(d.generated_at).toLocaleString("fr-FR",{dateStyle:"long",timeStyle:"short"})} · ${all.length} articles`:"Aucune donnée pour l’instant : lancez le workflow GitHub.";
+  const gs=["",...new Set(all.map(a=>a.group))];
+  gs.forEach(g=>{const b=el("button","chip",g||"Tout");b.setAttribute("aria-pressed",g===group);b.onclick=()=>{group=g;[...$("chips").children].forEach(x=>x.setAttribute("aria-pressed",x===b));draw()};$("chips").append(b)});
+  $("chips").style.cssText="display:flex;gap:6px;flex-wrap:wrap";
+  const ts=new Map(all.map(a=>[a.topic,a.label]));$("topic").append(new Option("Tous les sujets",""),...[...ts].map(([k,v])=>new Option(v,k)));
+  draw()}).catch(()=>{$("meta").textContent="Impossible de charger les données. Ouvrez la page via GitHub Pages (pas en double-cliquant sur le fichier)."});
+["q","topic","period"].forEach(i=>$(i).addEventListener("input",draw));
+</script>
+</body>
+</html>

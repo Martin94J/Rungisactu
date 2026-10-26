@@ -1,0 +1,5 @@
+anthropic>=0.40
+feedparser
+requests
+beautifulsoup4
+pyyaml
